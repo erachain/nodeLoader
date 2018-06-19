@@ -1,0 +1,17 @@
+group 'erachain.org'
+version '0.1'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-release" }
+}
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version:'19.0'
+    compile group: 'io.github.novacrypto', name: 'Base58', version: '0.1.2'
+    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.59'
+}
