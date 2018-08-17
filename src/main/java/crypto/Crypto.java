@@ -124,7 +124,7 @@ public class Crypto {
         }
     }
 
-    public byte[] sign(Pair<byte[], byte[]> pair, byte[] message) {
+    public static byte[] sign(Pair<byte[], byte[]> pair, byte[] message) {
         try {
             //GET SIGNATURE
             return Ed25519.sign(pair, message);

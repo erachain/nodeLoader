@@ -25,4 +25,12 @@ public class Account {
     public String getPublicKey() {
         return Base58.encode(this.keysPair.getB());
     }
+
+    public String getPrivateKey() {
+        return Base58.encode(this.keysPair.getA());
+    }
+
+    public Pair<byte[], byte[]> getKeysPair() {
+        return this.keysPair;
+    }
 }

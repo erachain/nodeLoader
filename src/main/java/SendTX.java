@@ -2,6 +2,7 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import io.github.novacrypto.base58.Base58;
+import utils.Pair;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,6 +34,7 @@ public class SendTX {
     private long reference;
     private long key;
     private byte feePow;
+    private int port;
 
     SendTX(byte[] data) {
         this.parseTX(data);
@@ -41,6 +43,8 @@ public class SendTX {
     SendTX(String creator, String recipient, String head, String data, BigDecimal amount, long timestamp,
            long key, byte feePow) {
         byte[] type = new byte[4];
+        type[0] = (byte) 31;
+        type[1] = (byte) 1;
         if (amount.compareTo(new BigDecimal(0)) > 0) {
             type[2] = (byte) 0;
         } else {
@@ -51,6 +55,7 @@ public class SendTX {
         } else {
             type[2] = (byte) -127;
         }
+        this.port = 9066;
         this.setTX((byte) 0, (byte) 0, creator, recipient, type, head, data, amount, timestamp, key, feePow);
     }
 
@@ -78,11 +83,13 @@ public class SendTX {
 
         // READ TIMESTAMP
         byte[] timestampBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
+        timestampBytes = Bytes.ensureCapacity(timestampBytes, TIMESTAMP_LENGTH, 0);
         this.timestamp = Longs.fromByteArray(timestampBytes);
         position += TIMESTAMP_LENGTH;
 
         // READ REFERENCE
         byte[] referenceBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
+        referenceBytes = Bytes.ensureCapacity(referenceBytes, TIMESTAMP_LENGTH, 0);
         this.reference = Longs.fromByteArray(referenceBytes);
         position += TIMESTAMP_LENGTH;
 
@@ -180,7 +187,7 @@ public class SendTX {
         // WRITE RECIPIENT
         data = Bytes.concat(data, this.recipient);
 
-        if (this.amount != null) {
+        if (this.amount != BigDecimal.ZERO) {
 
             // WRITE KEY
             byte[] keyBytes = Longs.toByteArray(2L);
@@ -217,6 +224,14 @@ public class SendTX {
             data = Bytes.concat(data, this.isText);
         }
 
+        // PORT
+        if (!withSign)
+            data = Bytes.concat(data, Ints.toByteArray(this.port));
+
         return data;
+    }
+
+    public void sign(Pair<byte[], byte[]> keysPir) {
+        this.signature = crypto.Crypto.sign(keysPir, this.toBytes(false));
     }
 }
